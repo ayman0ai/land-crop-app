@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 
-# إعداد الصفحة
+# Page Setup
 st.set_page_config(page_title="تقييم الأرض الزراعية", page_icon="🌾", layout="centered")
 
-# تنسيق CSS مخصص
+# Custom CSS formatting
 st.markdown("""
 <style>
 h1, h2, h3 {
@@ -36,7 +36,8 @@ div.stSlider > label {
 </style>
 """, unsafe_allow_html=True)
 
-# تنسيق CSS لمحاذاة النصوص العربية لليمين (تأكد من وجوده)
+# CSS formatting to align Arabic texts to the right (make sure it exists)
+
 st.markdown("""
     <style>
     html, body, [class*="css"]  {
@@ -47,7 +48,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# عرض العنوان والمقدمة
+# View title and intro
 st.title("🌾 نظام ذكي لتقييم الأرض الزراعية وترشيح المحاصيل")
 st.markdown(f"""
 <p class="arabic-text">
@@ -56,7 +57,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 st.markdown("---")
 
-# قاعدة بيانات المحاصيل مع متوسط الإنتاجية ومتطلبات الملوحة
+# Crop database with average yields and salinity requirements
 crops = pd.DataFrame({
     'Crop': ['قمح', 'شعير', 'ذرة', 'زيتون', 'نخيل', 'زعتر', 'ريحان', 'لافندر', 'بصل', 'ثوم'],
     'Soil': ['طينية جيدة الصرف', 'جيدة الصرف', 'رملية طينية عميقة', 'طينية خفيفة/رملية طينية جيدة الصرف', 'رملية طينية جيدة الصرف',
@@ -70,10 +71,10 @@ crops = pd.DataFrame({
     'Temp_max': [30, 30, 35, 35, 45, 35, 35, 35, 30, 30],
     'Salinity_min': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     'Salinity_max': [6.0, 5.0, 3.0, 4.0, 8.0, 3.0, 3.0, 3.0, 2.5, 2.5],
-    'Average_Yield': [3.5, 3.0, 5.0, 2.5, 2.0, 1.1, 1.5, 1.0, 6.0, 5.0] # متوسط الإنتاجية (طن/فدان)
+    'Average_Yield': [3.5, 3.0, 5.0, 2.5, 2.0, 1.1, 1.5, 1.0, 6.0, 5.0]
 })
 
-# مدخلات المستخدم
+# User input
 st.header("📋 بيانات التربة والمناخ:")
 soil = st.selectbox("🌍 نوع التربة", ['طينية', 'رملية', 'طينية ثقيلة', 'رملية-طينية', 'جيدة الصرف', 'طينية خفيفة', 'رملية طينية', 'رملية/حصوية', 'كلسية'])
 ph = st.slider("⚗️ pH التربة", 4.0, 9.0, 7.0)
@@ -81,7 +82,8 @@ rain = st.slider("🌧️ معدل الأمطار السنوي (مم)", 0, 2000,
 temp = st.slider("🌡️ درجة الحرارة المتوسطة (°C)", 0, 50, 28)
 salinity = st.slider("🧂 ملوحة التربة (dS/m)", 0.0, 10.0, 2.0)
 
-# دالة حساب التوافق
+# Compatibility Calculation Function
+
 def calculate_suitability(row):
     score = 0
     user_soil_simplified = soil.lower()
@@ -98,18 +100,18 @@ def calculate_suitability(row):
         score += 20
     return score
 
-# الحسابات
+# Calculations
 crops['Suitability (%)'] = crops.apply(calculate_suitability, axis=1)
 crops['Expected Yield (طن/فدان)'] = (crops['Average_Yield'] * crops['Suitability (%)']) / 100
 
-# تقريب القيم
+# Rounding values
 crops['Suitability (%)'] = crops['Suitability (%)'].round(1)
 crops['Expected Yield (طن/فدان)'] = crops['Expected Yield (طن/فدان)'].round(2)
 
-# ترشيح النتائج
+# Filtering results
 recommended = crops[crops['Suitability (%)'] >= 50].sort_values(by='Suitability (%)', ascending=False)
 
-# عرض النتائج
+# Displaying results
 st.markdown("---")
 st.header("📊 نتائج التقييم:")
 max_score = crops['Suitability (%)'].max()
